@@ -4,6 +4,7 @@ Requirements file parsing
 
 from __future__ import absolute_import
 
+import copy
 import optparse
 import os
 import re
@@ -128,8 +129,8 @@ def process_line(line, filename, line_number, finder=None, comes_from=None,
     defaults = parser.get_default_values()
     defaults.index_url = None
     if finder:
-        # `finder.format_control` will be updated during parsing
-        defaults.format_control = finder.format_control
+        # `finder.format_control` should be local to each line
+        defaults.format_control = copy.deepcopy(finder.format_control)
     args_str, options_str = break_args_options(line)
     if sys.version_info < (2, 7, 3):
         # Prior to 2.7.3, shlex cannot deal with unicode entries
@@ -144,8 +145,8 @@ def process_line(line, filename, line_number, finder=None, comes_from=None,
     # yield a line requirement
     if args_str:
         isolated = options.isolated_mode if options else False
-        if options:
-            cmdoptions.check_install_build_global(options, opts)
+        if opts:
+            cmdoptions.check_install_build_global(opts, opts)
         # get the options that apply to requirements
         req_options = {}
         for dest in SUPPORTED_OPTIONS_REQ_DEST:
@@ -217,6 +218,8 @@ def process_line(line, filename, line_number, finder=None, comes_from=None,
         if opts.trusted_hosts:
             finder.secure_origins.extend(
                 ("*", host, "*") for host in opts.trusted_hosts)
+        if options:
+            cmdoptions.check_install_build_global(options, opts)
 
 
 def break_args_options(line):

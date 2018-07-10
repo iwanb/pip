@@ -547,3 +547,22 @@ def test_install_options_local_to_package(script, data):
     assert bad not in result.files_created
     assert good in result.files_created
     assert result.files_created[good].dir
+
+
+def test_install_options_does_not_disable_wheels(script, data):
+    """Make sure --install-options disable wheel usage for other packages."""
+    home_simple = script.scratch_path.join("for-simple")
+    home_simple.mkdir()
+    reqs_file = script.scratch_path.join("reqs.txt")
+    reqs_file.write(
+        textwrap.dedent("""
+            simple --install-option='--home=%s'
+            wheel-only
+            """ % home_simple))
+    result = script.pip(
+        'install',
+        '--no-index', '-f', data.find_links,
+        '-r', reqs_file,
+        expect_error=False,
+        expect_stderr=True,
+    )

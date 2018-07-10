@@ -113,3 +113,7 @@ require_simple-1.0.tar.gz
 ------------------------
 contains "require_simple" package which requires simple>=2.0 - used for testing
 if dependencies are handled correctly.
+
+wheel_only*
+-----------
+A package which fails to install from source, but can be installed from wheel (simulates a prebuilt binary package with missing include files).
